@@ -1,0 +1,27 @@
+{
+  "name": "system-monitor-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm:backend\" \"npm:frontend\"",
+    "backend": "cd ../backend && uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
+    "frontend": "wait-on --http-get http://127.0.0.1:8000/api/metrics && vite --host",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .js,.jsx --fix"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react": "^7.33.1",
+    "prettier": "^3.6.2",
+    "vite": "^7.2.2",
+    "wait-on": "^9.0.3"
+  }
+}

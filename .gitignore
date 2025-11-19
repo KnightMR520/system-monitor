@@ -1,18 +1,26 @@
-# Virtual environments
-venv/
-.env
-.env.*
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Python cache & bytecode
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+env/
+venv/
+.venv/
 
-# VS Code workspace settings
+# IDE stuff
 .vscode/
+.DS_Store
 
-# Docker
-*.log
-*.sqlite
-*.db
+# Build output
+dist/
+build/
+
+# Environment files
+.env
+.env.*

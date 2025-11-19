@@ -5,6 +5,7 @@ import asyncio
 router = APIRouter()
 monitor = SystemMonitor(sample_interval=0.1)
 
+
 @router.get("/metrics")
 async def get_metrics():
     """Return a single snapshot (blocking call inside)."""
@@ -28,3 +29,4 @@ async def websocket_metrics(ws: WebSocket):
         pass
     except Exception:
         await ws.close()
+
