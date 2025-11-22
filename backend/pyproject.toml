@@ -1,0 +1,12 @@
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 88
+exclude = ["venv"]
+select = ["E", "F", "I"]  # Pyflakes, pycodestyle, import sorting
+ignore = ["E501"]         # Let Black handle line length
+
+[tool.ruff.isort]
+known-first-party = ["app"]
