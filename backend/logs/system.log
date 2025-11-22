@@ -14,3 +14,5 @@
 2025-11-22 13:42:13.257 | INFO     | app.routes:websocket_metrics:33 - WebSocket: Client connected
 2025-11-22 13:42:13.431 | INFO     | app.routes:get_metrics:15 - GET /metrics
 2025-11-22 16:08:13.964 | INFO     | app.main:startup_event:32 - Background logging started.
+2025-11-22 16:15:07.574 | INFO     | app.main:startup_event:32 - Background logging started.
+2025-11-22 16:17:14.781 | INFO     | app.main:startup_event:32 - Background logging started.

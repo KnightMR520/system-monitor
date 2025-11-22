@@ -10,6 +10,7 @@ class Metric(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
+    cpu = Column(Float)
     cpu_avg = Column(Float)
     cpu_per_core = Column(JSON)
     memory_percent = Column(Float)

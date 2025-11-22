@@ -11,6 +11,7 @@ async def log_metrics_loop():
         data = monitor.sample()
         db = SessionLocal()
         metric = Metric(
+            cpu=data["cpu"],
             cpu_avg=data["cpu_avg_percent"],
             cpu_per_core=data["cpu_per_core"],
             memory_percent=data["memory_percent"],
