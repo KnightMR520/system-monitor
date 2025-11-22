@@ -9,8 +9,13 @@ export default [
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'module',
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
       globals: {
         browser: true,
+        window: 'readonly',
+        document: 'readonly',
         fetch: 'readonly',
         WebSocket: 'readonly',
         console: 'readonly',
@@ -22,6 +27,7 @@ export default [
     },
     rules: {
       'react/react-in-jsx-scope': 'off',
+      'no-unused-vars': ['warn', { varsIgnorePattern: 'React' }],
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
     },
     settings: {
