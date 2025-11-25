@@ -5,7 +5,6 @@ export default function History() {
   const [data, setData] = useState([]);
   const [range, setRange] = useState("24h");
 
-  // Convert dropdown value to hours for the backend
   const getHours = (range) => {
     if (range === "1h") return 1;
     if (range === "24h") return 24;
@@ -15,15 +14,17 @@ export default function History() {
 
   useEffect(() => {
     fetch(`http://localhost:8000/api/metrics/history?hours=${getHours(range)}`)
-      .then((res) => res.json()) // <--- parse JSON
+      .then((res) => res.json())
       .then((rawData) => {
         const flatData = rawData.map((item) => {
-          const date = new Date(item.timestamp);
+          const estTime = new Date(item.timestamp).toLocaleTimeString("en-US", {
+            timeZone: "America/New_York",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
           return {
-            timestamp: date.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            timestamp: estTime,
             cpu_avg: item.cpu_avg,
             memory_percent: item.memory_percent,
             disk_read_bps: item.disk_read_bps,
@@ -31,10 +32,9 @@ export default function History() {
             net_recv_bps: item.net_recv_bps,
             net_sent_bps: item.net_sent_bps,
             gpu_util: item.gpu?.gpu_util || 0,
-            gpu_memory_used: item.gpu?.gpu_memory_used || 0,
-            gpu_memory_total: item.gpu?.gpu_memory_total || 0,
           };
         });
+
         setData(flatData);
       })
       .catch(console.error);
@@ -59,49 +59,42 @@ export default function History() {
           title="CPU %"
           data={data}
           dataKey="cpu_avg"
-          className="w-full min-w-0"
           xKey="timestamp"
         />
         <LineChartCard
           title="Memory %"
           data={data}
           dataKey="memory_percent"
-          className="w-full min-w-0"
           xKey="timestamp"
         />
         <LineChartCard
           title="Disk Read"
           data={data}
           dataKey="disk_read_bps"
-          className="w-full min-w-0"
           xKey="timestamp"
         />
         <LineChartCard
           title="Disk Write"
           data={data}
           dataKey="disk_write_bps"
-          className="w-full min-w-0"
           xKey="timestamp"
         />
         <LineChartCard
           title="Network In"
           data={data}
           dataKey="net_recv_bps"
-          className="w-full min-w-0"
           xKey="timestamp"
         />
         <LineChartCard
           title="Network Out"
           data={data}
           dataKey="net_sent_bps"
-          className="w-full min-w-0"
           xKey="timestamp"
         />
         <LineChartCard
           title="GPU %"
           data={data}
           dataKey="gpu_util"
-          className="w-full min-w-0"
           xKey="timestamp"
         />
       </div>
