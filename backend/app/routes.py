@@ -1,32 +1,46 @@
 import asyncio
 from datetime import datetime, timedelta
+from typing import Any, Dict, List
 
-from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
+from app.alerts import evaluate_alerts
 from app.db import SessionLocal
 from app.models import Metric
 from app.monitor import SystemMonitor
+from app.settings import get_settings, update_settings
 
 router = APIRouter()
-monitor = SystemMonitor(sample_interval=0.1)
+# Make monitor read sample_interval from settings if needed; currently we create with default.
+monitor = SystemMonitor(sample_interval=get_settings().get("sample_interval", 0.1))
 
 
 # GET latest snapshot
 @router.get("/metrics")
 async def get_metrics():
-    return monitor.sample()
+    sample = monitor.sample()
+    sample["alerts"] = evaluate_alerts(sample)
+    return sample
 
 
 # GET historical metrics
 @router.get("/metrics/history")
 async def get_metrics_history(hours: int = Query(1, ge=1, le=24)):
+    """
+    Returns historical metrics for the last `hours` hours (1..24).
+    Query param: ?hours=24
+    """
     db: Session = SessionLocal()
     since = datetime.utcnow() - timedelta(hours=hours)
-    records = db.query(Metric).filter(Metric.timestamp >= since).order_by(Metric.timestamp.asc()).all()
+    records: List[Metric] = (
+        db.query(Metric)
+        .filter(Metric.timestamp >= since)
+        .order_by(Metric.timestamp.asc())
+        .all()
+    )
     db.close()
 
-    # Convert SQLAlchemy objects to dict
     return [
         {
             "timestamp": r.timestamp.isoformat(),
@@ -50,12 +64,40 @@ async def websocket_metrics(ws: WebSocket):
     try:
         while True:
             data = monitor.sample()
+            data["alerts"] = evaluate_alerts(data)
             await ws.send_json(data)
             await asyncio.sleep(1)  # send every 1 second
     except WebSocketDisconnect:
+        # client disconnected cleanly
         pass
     except Exception:
-        await ws.close()
+        try:
+            await ws.close()
+        except Exception:
+            pass
+
+
+# Settings endpoints
+@router.get("/settings")
+async def read_settings():
+    return get_settings()
+
+@router.post("/settings")
+async def post_settings(payload: Dict[str, Any]):
+    # Validate incoming payload minimally
+    allowed_keys = {"sample_interval", "enable_gpu", "log_to_db"}
+    filtered = {k: v for k, v in payload.items() if k in allowed_keys}
+    if not filtered:
+        raise HTTPException(status_code=400, detail="No valid settings provided.")
+    updated = update_settings(filtered)
+    # If sample_interval changed, you may want to update monitor.sample_interval:
+    si = updated.get("sample_interval")
+    if si is not None:
+        try:
+            monitor.sample_interval = float(si)
+        except Exception:
+            pass
+    return updated
 
 
 # Health check
